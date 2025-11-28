@@ -917,7 +917,7 @@ System.out.println("Initializing SparkConf worked!!...");
   
 		incidentData = spark
 				.read()
-				.csv("/home/path/Desktop/workspace-java/Age/data/Police_Department_Incidents.data");
+				.csv("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/Police_Department_Incidents.data");
 
 		incidentDataRowRDD = incidentData.filter(row -> row.length()== 13).javaRDD().map((row) -> {
 			return RowFactory.create(
@@ -973,36 +973,36 @@ System.out.println("Initializing SparkConf worked!!...");
 		try {
 			// NON CRIME
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/good/d1.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/good/d1.txt"))));
 			
 			inputTextRow.add( RowFactory.create("00001", "TRAVEL", content ,0) );
-			content = utils.Utilities.cleanText(new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/good/d2.txt"))));
+			content = utils.Utilities.cleanText(new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/good/d2.txt"))));
 			
 			inputTextRow.add( RowFactory.create("00002", "TRAVEL", content ,0) );
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/good/d3.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/good/d3.txt"))));
 			
 			inputTextRow.add( RowFactory.create("00003", "TRAVEL", content ,0) );
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/good/d4.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/good/d4.txt"))));
 			inputTextRow.add( RowFactory.create("00004", "TRAVEL", content ,0) );
 			
 
 			// CRIME
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/bad/d1.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/bad/d1.txt"))));
 			inputTextRow.add( RowFactory.create("10003", "CRIME", content ,1) );
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/bad/d2.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/bad/d2.txt"))));
 			inputTextRow.add( RowFactory.create("10003", "CRIME", content ,1) );
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/bad/d3.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/bad/d3.txt"))));
 			inputTextRow.add( RowFactory.create("10003", "CRIME", content ,1) );
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/bad/d4.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/bad/d4.txt"))));
 			inputTextRow.add( RowFactory.create("10003", "CRIME", content ,1) );
 			content = utils.Utilities.cleanText(
-					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/Age/data/bad/d5.txt"))));
+					new String(Files.readAllBytes(Paths.get("/home/path/Desktop/workspace-java/MLDataNavigationUIApp/data/bad/d5.txt"))));
 			inputTextRow.add( RowFactory.create("10003", "CRIME", content ,1) );
 		} catch (Exception e) {
 			

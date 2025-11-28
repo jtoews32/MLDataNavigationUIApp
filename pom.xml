@@ -92,7 +92,8 @@
                 <version>3.1.0</version> <!-- Use a recent version -->
                     <configuration>
  
-                    <mainClass>MultiStage.JavaClass</mainClass> <!-- Replace with your fully qualified main class name -->
+                    <!-- mainClass>MultiStage.JavaClass</mainClass --> <!-- Replace with your fully qualified main class name -->
+                     <mainClass>JavaFXClass</mainClass>
                     </configuration>
 
             </plugin>

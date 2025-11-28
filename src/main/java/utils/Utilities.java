@@ -27,7 +27,7 @@ public class Utilities {
 		}*/
 
 		// String path = "C:\\Users\\jonrt\\OneDrive\\Desktop\\Projects\\Age\\data\\";
-		String path = "C:/Users/jonrt/OneDrive/Desktop/Projects/Age/data/";
+		String path = "C:/Users/jonrt/OneDrive/Desktop/Projects/MLDataNavigationUIApp/data/";
 		return path;
 	}
 	
