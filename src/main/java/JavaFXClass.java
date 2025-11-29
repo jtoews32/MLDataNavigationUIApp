@@ -24,6 +24,7 @@ import java.util.HashMap;
 import javax.xml.validation.Schema;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.function.ForeachFunction;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
@@ -205,7 +206,6 @@ import scala.collection.Seq;
             
 
  */
-
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -268,7 +268,7 @@ public class JavaFXClass extends Application {
 
             incidentData = spark
                     .read()
-					.option("header", "true") 
+                    .option("header", "true")
                     .csv(selectedFile.getAbsolutePath());
 
             incidentData.show(5, false);
@@ -285,90 +285,57 @@ public class JavaFXClass extends Application {
             for (String colName : columnNames) {
 
                 System.out.println(colName.toString());
-
                 TableColumn<Map, String> column1 = new TableColumn<>(colName.toString());
-
                 column1.setCellValueFactory(new MapValueFactory<>(colName.toString().replaceAll(" ", "")));
-
                 tableView.getColumns().add(column1);
 
             }
 
-            Row row = incidentData.first();
-
-            Seq<Object> rowSeq = row.toSeq();
-
-            // Convert the Scala Seq to a Java List for easier iteration in Java
-            java.util.List<Object> rowList = JavaConverters.seqAsJavaList(rowSeq);
-
- 
-			Map<String, Object> item1 = new HashMap<>();
 
 
-			IntStream.range(0, rowList.size())
-         		.forEach(i ->  {
+			List<Row> rows = incidentData.collectAsList();
+			for (Row row : rows) {
 
-					String name = columnNames[i].replaceAll(" ", "");
+				System.out.println("Row: GOT IT " );
+
+
+				// Access individual column values within the row
+			//	String columnName = row.getString(row.fieldIndex("column_name"));
+			//	System.out.println("Column Name: " + columnName);
 
 				
-					item1.put(name, rowList.get(i).toString() );
-    				
 
-				}
-					
-			
-			);
+                Seq<Object> rowSeq = row.toSeq();
 
+                java.util.List<Object> rowList = JavaConverters.seqAsJavaList(rowSeq);
 
+                Map<String, Object> item1 = new HashMap<>();
 
-	 
+                IntStream.range(0, rowList.size())
+                        .forEach(i -> {
+							
+                            String name = columnNames[i].replaceAll(" ", "");
 
-		/*  	rowList.forEach( v -> {
-				System.out.println( v  );
+                            item1.put(name, rowList.get(i).toString());
 
+                        }
+                        );
 
- 
-				
+                tableView.getItems().add(item1);
 
-				index++;
-				// tableView.getItems().add(  v );
-
+			}
 
 
-			} ); */
-			tableView.getItems().add(item1);
+        
 
-
-			
-		 
- /* 
+            // Row row = incidentData.first();
+            /* 
 			incidentData.collectAsList().forEach( r -> {
 				Person person = new Person( r.getString(0), r.getString(1) );
 				tableView.getItems().add( person );
 			} );*/
         });
 
-
-        /*
-			TableColumn<Person, String> column1 = new TableColumn<>("First Name");
-			
-			column1.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-
-
-			TableColumn<Person, String> column2 = new TableColumn<>("Last Name");
-			
-			column2.setCellValueFactory(new PropertyValueFactory<>("lastName"));
-
-
-			tableView.getColumns().add(column1);
-			tableView.getColumns().add(column2);
-
-			tableView.getItems().add(new Person("John", "Doe"));
-			tableView.getItems().add(new Person("Jane", "Deer"));
-
- 
-
-         */
         //Label nameLabel = new Label("Enter your name:");
         TextField nameField = new TextField();
         Label feedbackLabel = new Label();
@@ -381,8 +348,7 @@ public class JavaFXClass extends Application {
                 feedbackLabel.setText("Please enter a name.");
             }
         });*/
-
-        VBox vbox1 = new VBox(button1 );
+        VBox vbox1 = new VBox(button1);
         vbox1.setPadding(new Insets(10, 20, 10, 10));
         //vbox1.setMargin(label, new Insets(10, 10, 10, 10));
 
