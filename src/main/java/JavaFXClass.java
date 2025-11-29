@@ -61,6 +61,7 @@ import scala.collection.JavaConverters;
 import utils.Utilities;
 
 import java.nio.file.Files;
+import java.util.stream.IntStream;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -204,6 +205,7 @@ import scala.collection.Seq;
             
 
  */
+
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -245,7 +247,7 @@ public class JavaFXClass extends Application {
         // listView.getItems().add("File2.csv");
         // listView.getItems().add("File3.csv");
         Button button1 = new Button("Select File");
-        Button button2 = new Button("Button Number 2");
+        //Button button2 = new Button("Button Number 2");
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File("C:\\Users\\jonrt\\OneDrive\\Desktop\\Projects\\MLDataNavigationUIApp\\data"));
@@ -266,6 +268,7 @@ public class JavaFXClass extends Application {
 
             incidentData = spark
                     .read()
+					.option("header", "true") 
                     .csv(selectedFile.getAbsolutePath());
 
             incidentData.show(5, false);
@@ -298,27 +301,46 @@ public class JavaFXClass extends Application {
             // Convert the Scala Seq to a Java List for easier iteration in Java
             java.util.List<Object> rowList = JavaConverters.seqAsJavaList(rowSeq);
 
-            Map<String, Object> item1 = new HashMap<>();
-            item1.put("_c0", "Randall");
-            item1.put("_c1", "Kovic");
-            item1.put("_c2", "Randall");
-            item1.put("_c3", "Kovic");
-            tableView.getItems().add(item1);
+ 
+			Map<String, Object> item1 = new HashMap<>();
 
-            /*  
-			rowList.forEach( v -> {
+
+			IntStream.range(0, rowList.size())
+         		.forEach(i ->  {
+
+					String name = columnNames[i].replaceAll(" ", "");
+
+				
+					item1.put(name, rowList.get(i).toString() );
+    				
+
+				}
+					
+			
+			);
+
+
+
+	 
+
+		/*  	rowList.forEach( v -> {
 				System.out.println( v  );
 
 
-
  
-  
+				
+
+				index++;
 				// tableView.getItems().add(  v );
 
-				
 
 
 			} ); */
+			tableView.getItems().add(item1);
+
+
+			
+		 
  /* 
 			incidentData.collectAsList().forEach( r -> {
 				Person person = new Person( r.getString(0), r.getString(1) );
@@ -351,24 +373,24 @@ public class JavaFXClass extends Application {
         TextField nameField = new TextField();
         Label feedbackLabel = new Label();
 
-        button2.setOnAction(e -> {
+        /* button2.setOnAction(e -> {
             String name = nameField.getText();
             if (!name.isEmpty()) {
                 feedbackLabel.setText("Hello, " + name + "!");
             } else {
                 feedbackLabel.setText("Please enter a name.");
             }
-        });
+        });*/
 
-        VBox vbox1 = new VBox(button1, button2);
+        VBox vbox1 = new VBox(button1 );
         vbox1.setPadding(new Insets(10, 20, 10, 10));
         //vbox1.setMargin(label, new Insets(10, 10, 10, 10));
 
         // vbox1.setWidth(200);
         // vbox1.setHeight(300);
-        HBox hbox2 = new HBox(vbox1, listView, tableView);
+        HBox hbox2 = new HBox(vbox1, listView);
 
-        VBox vbox = new VBox(hbox2, nameField, feedbackLabel);
+        VBox vbox = new VBox(hbox2, tableView);
 
         Scene scene = new Scene(vbox, 800, 200);
 
@@ -383,7 +405,7 @@ public class JavaFXClass extends Application {
         hboxList.addAll(label);
          */
         // Scene scene = new Scene(hbox, 100, 100);
-        subStage.setTitle("MI");
+        subStage.setTitle("Financial Prediction Star");
         subStage.setScene(scene);
 
         subStage.setWidth(800);
