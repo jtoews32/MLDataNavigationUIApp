@@ -1,12 +1,29 @@
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 
+
+
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.xml.validation.Schema;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.ml.Pipeline;
@@ -36,16 +53,24 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import scala.collection.JavaConverters;
 import utils.Utilities;
 
 import java.nio.file.Files;
 
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 
-
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import scala.collection.Seq;
 
 /*
 
@@ -182,20 +207,41 @@ import javafx.scene.layout.HBox;
 */
 
 
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
+
 
 public class JavaFXClass extends Application  {
+
+    public static Dataset<Row> incidentData = null;
+    public static SparkSession spark = null; 
+
+    static {
+
+		final SparkConf sparkConf = new SparkConf()
+					.setAppName("CrimeAvoidanceAI")
+					.setMaster("local[*]") // Run locally with all available cores
+					.set("spark.executor.memory", "2g") // Set executor memory
+					.set("spark.driver.memory", "2g"); // Set driver memory
+
+   
+        spark = SparkSession.builder().appName("").config(sparkConf).getOrCreate();
+        
+
+
+    }
+
+
+
     @Override
     public void start(Stage subStage) {
 
  
-		String javaVersion = System.getProperty("java.version");
-        String javafxVersion = System.getProperty("javafx.version");
-        Label l = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
-        Label label = new Label("Loading...");
 
-
-
-                PieChart pieChart = new PieChart();
+        PieChart pieChart = new PieChart();
 
         PieChart.Data slice1 = new PieChart.Data("Desktop", 213);
         PieChart.Data slice2 = new PieChart.Data("Phone"  , 67);
@@ -205,16 +251,166 @@ public class JavaFXClass extends Application  {
         pieChart.getData().add(slice2);
         pieChart.getData().add(slice3);
 
-        Button button1 = new Button("Button Number 1");
+        ListView listView = new ListView();
+        
+       // listView.getItems().add("File2.csv");
+       // listView.getItems().add("File3.csv");
+
+        Button button1 = new Button("Select File");
         Button button2 = new Button("Button Number 2");
 
-        HBox hbox1 = new HBox(button1, button2);
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File("C:\\Users\\jonrt\\OneDrive\\Desktop\\Projects\\MLDataNavigationUIApp\\data"));
+        //fileChooser.setInitialFileName("myfile.txt");
+
+       /*  fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+            new FileChooser.ExtensionFilter("Data Files", "*.data")
+        );*/
+
+
+		TableView tableView = new TableView();
+
+
+        button1.setOnAction(e -> {
+ 
+            File selectedFile = fileChooser.showOpenDialog(subStage);
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+
+            listView.getItems().add( selectedFile.getName() );
+
+            incidentData = spark
+				.read()
+				.csv( selectedFile.getAbsolutePath() );
+
+            incidentData.show(5, false);
+            // incidentData.printSchema();
 
 
 
-        VBox vbox = new VBox(pieChart, hbox1);
 
-        Scene scene = new Scene(vbox, 400, 200);
+
+        // Get the schema of the Dataset
+        StructType schema = incidentData.schema();
+
+        // Get the column names (header) from the schema
+        String[] columnNames = schema.fieldNames();
+
+        // Print the column names
+        System.out.println("Column Names (Header):");
+        for (String colName : columnNames) {
+ 
+				System.out.println( colName.toString() );
+
+ 
+				TableColumn<Row, String> column1 = new TableColumn<>(colName.toString());
+			
+				column1.setCellValueFactory(new PropertyValueFactory<>(colName.toString().replaceAll(" ", "")));
+
+
+				tableView.getColumns().add(column1);  
+ 
+        }
+
+
+
+
+
+
+
+
+
+
+			Row row = incidentData.first();
+	 
+			Seq<Object> rowSeq = row.toSeq();
+
+			// Convert the Scala Seq to a Java List for easier iteration in Java
+			java.util.List<Object> rowList = JavaConverters.seqAsJavaList(rowSeq);
+
+
+			rowList.forEach( v -> {
+				System.out.println( v  );
+
+ 
+  
+				tableView.getItems().add(  v );
+
+				
+
+
+			} );
+
+
+
+
+/* 
+			incidentData.collectAsList().forEach( r -> {
+				Person person = new Person( r.getString(0), r.getString(1) );
+				tableView.getItems().add( person );
+			} );*/
+
+			
+		});
+
+
+/*
+			TableColumn<Person, String> column1 = new TableColumn<>("First Name");
+			
+			column1.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+
+
+			TableColumn<Person, String> column2 = new TableColumn<>("Last Name");
+			
+			column2.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+
+
+			tableView.getColumns().add(column1);
+			tableView.getColumns().add(column2);
+
+			tableView.getItems().add(new Person("John", "Doe"));
+			tableView.getItems().add(new Person("Jane", "Deer"));
+
+ 
+
+        */
+
+
+
+        //Label nameLabel = new Label("Enter your name:");
+        TextField nameField = new TextField();
+        Label feedbackLabel = new Label();
+
+
+
+
+        button2.setOnAction(e -> {
+            String name = nameField.getText();
+            if (!name.isEmpty()) {
+                feedbackLabel.setText("Hello, " + name + "!");
+            } else {
+                feedbackLabel.setText("Please enter a name.");
+            }
+        });
+
+
+        VBox vbox1 = new VBox(button1, button2   );
+        vbox1.setPadding(new Insets(10,20, 10,10));
+        //vbox1.setMargin(label, new Insets(10, 10, 10, 10));
+
+        // vbox1.setWidth(200);
+       // vbox1.setHeight(300);
+
+
+        HBox hbox2 = new HBox(vbox1, listView, tableView);
+       
+
+
+
+        VBox vbox = new VBox(hbox2, nameField, feedbackLabel );
+
+        Scene scene = new Scene(vbox, 800, 200);
 
 
 /*  
@@ -228,11 +424,11 @@ public class JavaFXClass extends Application  {
 		*/
 		// Scene scene = new Scene(hbox, 100, 100);
 
-		subStage.setTitle("Crime Avoidance AI");
+		subStage.setTitle("MI");
 		subStage.setScene(scene);
 
         
-        subStage.setWidth(600);
+        subStage.setWidth(800);
         subStage.setHeight(300);
 
 		subStage.show();
@@ -286,14 +482,61 @@ public class JavaFXClass extends Application  {
         subStage.setScene(scene);
         subStage.show();
          */
-
+		
     }
 
     public static void main(String[] args) {
+
+
+/* 
+
+
+       Schema schema = new Schema.Parser().parse(
+            ParquetWriteExample.class.getResourceAsStream("/user.avsc"));
+
+        List<GenericData.Record> records = Arrays.asList(
+            new GenericData.Record(schema) {{ put("name", "Alice"); put("favorite_number", 7); put("favorite_color", "blue"); }},
+            new GenericData.Record(schema) {{ put("name", "Bob"); put("favorite_number", 13); put("favorite_color", null); }},
+            new GenericData.Record(schema) {{ put("name", "Charlie"); put("favorite_number", null); put("favorite_color", "green"); }}
+        );
+
+        Path fileToWrite = new Path("users.parquet");
+        try (ParquetWriter<GenericData.Record> writer = AvroParquetWriter.<GenericData.Record>builder(fileToWrite)
+                .withSchema(schema)
+                .withConf(new Configuration())
+                .withCompressionCodec(CompressionCodecName.SNAPPY)
+                .build()) {
+            for (GenericData.Record record : records) {
+                writer.write(record);
+            }
+            System.out.println("Parquet file written successfully to " + fileToWrite);
+        }
+
+*/
+
+
+
+
+
+
+
+
         try { 
             Class.forName("org.apache.spark.sql.SparkSession"); 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* 
 		
 		Dataset<Row> incidentData = null;
 		StructType schemaNB;
@@ -435,13 +678,7 @@ public class JavaFXClass extends Application  {
 
 
 
-
-
-
-
-
-
-
+*/
 
 
 
