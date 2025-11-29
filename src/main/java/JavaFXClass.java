@@ -1,3 +1,4 @@
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configuration;
@@ -10,9 +11,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-
-
-
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -20,8 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.xml.validation.Schema;
 
@@ -53,6 +51,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
@@ -204,158 +203,131 @@ import scala.collection.Seq;
 			
             
 
-*/
-
-
+ */
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-
-public class JavaFXClass extends Application  {
+public class JavaFXClass extends Application {
 
     public static Dataset<Row> incidentData = null;
-    public static SparkSession spark = null; 
+    public static SparkSession spark = null;
 
     static {
 
-		final SparkConf sparkConf = new SparkConf()
-					.setAppName("CrimeAvoidanceAI")
-					.setMaster("local[*]") // Run locally with all available cores
-					.set("spark.executor.memory", "2g") // Set executor memory
-					.set("spark.driver.memory", "2g"); // Set driver memory
+        final SparkConf sparkConf = new SparkConf()
+                .setAppName("CrimeAvoidanceAI")
+                .setMaster("local[*]") // Run locally with all available cores
+                .set("spark.executor.memory", "2g") // Set executor memory
+                .set("spark.driver.memory", "2g"); // Set driver memory
 
-   
         spark = SparkSession.builder().appName("").config(sparkConf).getOrCreate();
-        
-
 
     }
-
-
 
     @Override
     public void start(Stage subStage) {
 
- 
-
         PieChart pieChart = new PieChart();
 
         PieChart.Data slice1 = new PieChart.Data("Desktop", 213);
-        PieChart.Data slice2 = new PieChart.Data("Phone"  , 67);
-        PieChart.Data slice3 = new PieChart.Data("Tablet" , 36);
+        PieChart.Data slice2 = new PieChart.Data("Phone", 67);
+        PieChart.Data slice3 = new PieChart.Data("Tablet", 36);
 
         pieChart.getData().add(slice1);
         pieChart.getData().add(slice2);
         pieChart.getData().add(slice3);
 
         ListView listView = new ListView();
-        
-       // listView.getItems().add("File2.csv");
-       // listView.getItems().add("File3.csv");
 
+        // listView.getItems().add("File2.csv");
+        // listView.getItems().add("File3.csv");
         Button button1 = new Button("Select File");
         Button button2 = new Button("Button Number 2");
-
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File("C:\\Users\\jonrt\\OneDrive\\Desktop\\Projects\\MLDataNavigationUIApp\\data"));
         //fileChooser.setInitialFileName("myfile.txt");
 
-       /*  fileChooser.getExtensionFilters().addAll(
+        /*  fileChooser.getExtensionFilters().addAll(
             new FileChooser.ExtensionFilter("Text Files", "*.txt"),
             new FileChooser.ExtensionFilter("Data Files", "*.data")
         );*/
-
-
-		TableView tableView = new TableView();
-
+        TableView tableView = new TableView();
 
         button1.setOnAction(e -> {
- 
+
             File selectedFile = fileChooser.showOpenDialog(subStage);
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
 
-            listView.getItems().add( selectedFile.getName() );
+            listView.getItems().add(selectedFile.getName());
 
             incidentData = spark
-				.read()
-				.csv( selectedFile.getAbsolutePath() );
+                    .read()
+                    .csv(selectedFile.getAbsolutePath());
 
             incidentData.show(5, false);
             // incidentData.printSchema();
 
+            // Get the schema of the Dataset
+            StructType schema = incidentData.schema();
 
+            // Get the column names (header) from the schema
+            String[] columnNames = schema.fieldNames();
 
+            // Print the column names
+            System.out.println("Column Names (Header):");
+            for (String colName : columnNames) {
 
+                System.out.println(colName.toString());
 
-        // Get the schema of the Dataset
-        StructType schema = incidentData.schema();
+                TableColumn<Map, String> column1 = new TableColumn<>(colName.toString());
 
-        // Get the column names (header) from the schema
-        String[] columnNames = schema.fieldNames();
+                column1.setCellValueFactory(new MapValueFactory<>(colName.toString().replaceAll(" ", "")));
 
-        // Print the column names
-        System.out.println("Column Names (Header):");
-        for (String colName : columnNames) {
- 
-				System.out.println( colName.toString() );
+                tableView.getColumns().add(column1);
 
- 
-				TableColumn<Row, String> column1 = new TableColumn<>(colName.toString());
-			
-				column1.setCellValueFactory(new PropertyValueFactory<>(colName.toString().replaceAll(" ", "")));
+            }
 
+            Row row = incidentData.first();
 
-				tableView.getColumns().add(column1);  
- 
-        }
+            Seq<Object> rowSeq = row.toSeq();
 
+            // Convert the Scala Seq to a Java List for easier iteration in Java
+            java.util.List<Object> rowList = JavaConverters.seqAsJavaList(rowSeq);
 
+            Map<String, Object> item1 = new HashMap<>();
+            item1.put("_c0", "Randall");
+            item1.put("_c1", "Kovic");
+            item1.put("_c2", "Randall");
+            item1.put("_c3", "Kovic");
+            tableView.getItems().add(item1);
 
-
-
-
-
-
-
-
-			Row row = incidentData.first();
-	 
-			Seq<Object> rowSeq = row.toSeq();
-
-			// Convert the Scala Seq to a Java List for easier iteration in Java
-			java.util.List<Object> rowList = JavaConverters.seqAsJavaList(rowSeq);
-
-
+            /*  
 			rowList.forEach( v -> {
 				System.out.println( v  );
 
+
+
  
   
-				tableView.getItems().add(  v );
+				// tableView.getItems().add(  v );
 
 				
 
 
-			} );
-
-
-
-
-/* 
+			} ); */
+ /* 
 			incidentData.collectAsList().forEach( r -> {
 				Person person = new Person( r.getString(0), r.getString(1) );
 				tableView.getItems().add( person );
 			} );*/
-
-			
-		});
+        });
 
 
-/*
+        /*
 			TableColumn<Person, String> column1 = new TableColumn<>("First Name");
 			
 			column1.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -374,16 +346,10 @@ public class JavaFXClass extends Application  {
 
  
 
-        */
-
-
-
+         */
         //Label nameLabel = new Label("Enter your name:");
         TextField nameField = new TextField();
         Label feedbackLabel = new Label();
-
-
-
 
         button2.setOnAction(e -> {
             String name = nameField.getText();
@@ -394,26 +360,20 @@ public class JavaFXClass extends Application  {
             }
         });
 
-
-        VBox vbox1 = new VBox(button1, button2   );
-        vbox1.setPadding(new Insets(10,20, 10,10));
+        VBox vbox1 = new VBox(button1, button2);
+        vbox1.setPadding(new Insets(10, 20, 10, 10));
         //vbox1.setMargin(label, new Insets(10, 10, 10, 10));
 
         // vbox1.setWidth(200);
-       // vbox1.setHeight(300);
-
-
+        // vbox1.setHeight(300);
         HBox hbox2 = new HBox(vbox1, listView, tableView);
-       
 
-
-
-        VBox vbox = new VBox(hbox2, nameField, feedbackLabel );
+        VBox vbox = new VBox(hbox2, nameField, feedbackLabel);
 
         Scene scene = new Scene(vbox, 800, 200);
 
 
-/*  
+        /*  
         HBox hbox = new HBox();
         hbox.setSpacing(10);
         hbox.setPadding(new Insets(10,20, 10,10));
@@ -421,21 +381,17 @@ public class JavaFXClass extends Application  {
         
         ObservableList hboxList = hbox.getChildren();
         hboxList.addAll(label);
-		*/
-		// Scene scene = new Scene(hbox, 100, 100);
+         */
+        // Scene scene = new Scene(hbox, 100, 100);
+        subStage.setTitle("MI");
+        subStage.setScene(scene);
 
-		subStage.setTitle("MI");
-		subStage.setScene(scene);
-
-        
         subStage.setWidth(800);
         subStage.setHeight(300);
 
-		subStage.show();
+        subStage.show();
 
- 
-
-/* 
+        /* 
         //Stage subStage = new Stage();
 		//FlowPane root = new FlowPane();
 		//Scene scene = new Scene(root, 300, 200);
@@ -482,13 +438,12 @@ public class JavaFXClass extends Application  {
         subStage.setScene(scene);
         subStage.show();
          */
-		
     }
 
     public static void main(String[] args) {
 
 
-/* 
+        /* 
 
 
        Schema schema = new Schema.Parser().parse(
@@ -512,31 +467,11 @@ public class JavaFXClass extends Application  {
             System.out.println("Parquet file written successfully to " + fileToWrite);
         }
 
-*/
+         */
+        try {
+            Class.forName("org.apache.spark.sql.SparkSession");
 
-
-
-
-
-
-
-
-        try { 
-            Class.forName("org.apache.spark.sql.SparkSession"); 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* 
+            /* 
 		
 		Dataset<Row> incidentData = null;
 		StructType schemaNB;
@@ -678,20 +613,11 @@ public class JavaFXClass extends Application  {
 
 
 
-*/
+             */
+        } catch (Exception e) {
+            System.out.println("Spark not found in classpath");
 
-
-
-
-        } catch (Exception e) { 
-            System.out.println("Spark not found in classpath"); 
-         
         }
-
-
-
-
-
 
         launch(args);
     }
