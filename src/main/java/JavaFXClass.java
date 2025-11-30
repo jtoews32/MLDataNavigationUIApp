@@ -73,139 +73,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import scala.collection.Seq;
 
-/*
 
-
-
-			subStage.setTitle("Street");
-
-			Map<String, Integer> streetHashMap = new HashMap<String, Integer>();
-
-			JavaRDD<String> streetsRDD = incidentDataRowRDD.map(row -> row.getString(8).replaceAll("Block of ", "")
-					.replaceAll("[0-9]+\\s", "").replaceAll("^\\s+", "") + " "
-					+ new XY(row.getDouble(9), row.getDouble(10)));
-
-			JavaPairRDD<String, Integer> pairs = streetsRDD.mapToPair(s -> new Tuple2(s, 1));
-			List<Tuple2<String, Integer>> counts = pairs.reduceByKey((a, b) -> a + b).sortByKey().collect();
-
-			for (Tuple2<String, Integer> street : counts) {
-				if (street._1.contains("/")) {
-					data.add(street._1);
-				}
-
-				streetHashMap.put(street._1.toLowerCase(), street._2.intValue());
-			}
-
-			JavaRDD<Row> streetRDD = pairs.reduceByKey((a, b) -> a + b).map((t) -> {
-				return RowFactory.create(t._1, t._2.intValue() > 2000 ? 2000 : t._2.intValue());
-			});
-
-			List<String> tableColumns1 = Arrays.asList("street", "count");
-
-			StructType schema1 = Utilities.createSchema(tableColumns1);
-			Dataset<Row> rddFilteredData = spark.createDataFrame(streetRDD.rdd(), schema1);
-
-			List<Row> rows = rddFilteredData.describe("count").collectAsList();
-
-			Double count = 0.0;
-			Double mean = 0.0;
-			Double stddev = 0.0;
-			Double min = 0.0;
-			Double max = 0.0;
-
-			for (Row row : rows) {
-				if (row.get(0).equals("count")) {
-					count = Double.valueOf(row.get(1).toString());
-				}
-				if (row.get(0).equals("mean")) {
-					mean = Double.valueOf(row.get(1).toString());
-				}
-				if (row.get(0).equals("stddev")) {
-					stddev = Double.valueOf(row.get(1).toString());
-				}
-				if (row.get(0).equals("min")) {
-					min = Double.valueOf(row.get(1).toString());
-				}
-				if (row.get(0).equals("max")) {
-					max = Double.valueOf(row.get(1).toString());
-				}
-			}
-
-			VBox boxList = new VBox();
-			scene = new Scene(boxList, 400, 200);
-			subStage.setScene(scene);
-			subStage.setTitle("What Street?");
-			boxList.getChildren().addAll(list, label);
-			VBox.setVgrow(list, Priority.ALWAYS);
-
-			label.setLayoutX(10);
-			label.setLayoutY(115);
-			label.setFont(Font.font("Verdana", 20));
-
-			list.setItems(data);
-
-			list.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
-				@Override
-				public ListCell<String> call(ListView<String> list) {
-					return new UITextCell();
-				}
-			});
-
-			final Integer stddeviation = stddev.intValue();
-			final Integer average = mean.intValue();
-
-			list.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-				public void changed(ObservableValue<? extends String> ov, String old_val, String selectionText) {
-					label.setText(selectionText);
-
-					String v1 = selectionText.split(":")[0];
-					String v2 = selectionText.split(":")[1];
-					String v3 = selectionText.split(":")[2];
-
-					System.out.println(v1 + " " + v2 + " " + v3);
-
-					XY xy = new XY(
-							BigDecimal.valueOf(Double.valueOf(selectionText.split(":")[1]))
-									.setScale(6, RoundingMode.HALF_UP).doubleValue(),
-							BigDecimal.valueOf(Double.valueOf(selectionText.split(":")[2]))
-									.setScale(6, RoundingMode.HALF_UP).doubleValue());
-
-					prediction.setXy(xy);
-
-					Integer crimeCount = streetHashMap.get(selectionText.toLowerCase());
-
-					if (crimeCount > stddeviation) {
-						series.getData().add(new XYChart.Data("Street", 10));
-						prediction.setStreet(10);
-						return;
-					}
-
-					if (crimeCount > average) {
-						series.getData().add(new XYChart.Data("Street", 8));
-						prediction.setStreet(8);
-						return;
-					}
-
-					if (crimeCount > average / 2) {
-						series.getData().add(new XYChart.Data("Street", 6));
-						prediction.setStreet(6);
-						return;
-					}
-
-					series.getData().add(new XYChart.Data("Street", 4));
-					prediction.setStreet(4);
-
-				}
-			});
-			subStage.show();
-			series.getData().add(new XYChart.Data("Street", 0));
-			prediction.setStreet(0);
-			state = 2;
-			break;
-			
-            
-
- */
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -247,7 +115,7 @@ public class JavaFXClass extends Application {
         // listView.getItems().add("File2.csv");
         // listView.getItems().add("File3.csv");
         Button button1 = new Button("Select File");
-        //Button button2 = new Button("Button Number 2");
+        Button button2 = new Button("Street Window");
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File("C:\\Users\\jonrt\\OneDrive\\Desktop\\Projects\\MLDataNavigationUIApp\\data"));
@@ -340,15 +208,21 @@ public class JavaFXClass extends Application {
         TextField nameField = new TextField();
         Label feedbackLabel = new Label();
 
-        /* button2.setOnAction(e -> {
+     	 button2.setOnAction(e -> {
+			// Run street display here. 
+
+			/* 
             String name = nameField.getText();
             if (!name.isEmpty()) {
                 feedbackLabel.setText("Hello, " + name + "!");
             } else {
                 feedbackLabel.setText("Please enter a name.");
-            }
-        });*/
-        VBox vbox1 = new VBox(button1);
+            }*/
+        }); 
+
+
+
+        VBox vbox1 = new VBox(button1, button2 );
         vbox1.setPadding(new Insets(10, 20, 10, 10));
         //vbox1.setMargin(label, new Insets(10, 10, 10, 10));
 
